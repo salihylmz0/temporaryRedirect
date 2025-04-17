@@ -46,6 +46,26 @@
             color: #666;
             margin-top: 20px;
         }
+        .error-container {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px;
+            color: #c62828;
+        }
+        .error-title {
+            color: #b71c1c;
+            margin: 0 0 10px 0;
+        }
+        .error-details {
+            font-family: monospace;
+            background: #fff;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -68,37 +88,62 @@
     </div>
     <script>
         function handleRedirect() {
-            // Display current URL
-            document.getElementById('current-url').textContent = window.location.href;
+            try {
+                // Display current URL
+                document.getElementById('current-url').textContent = window.location.href;
 
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const state = params.get('state');
-            
-            // Display all parameters
-            const paramsList = document.getElementById('params-list');
-            params.forEach((value, key) => {
-                paramsList.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
-            });
-            
-            if (code && state) {
-                // Your existing redirect URI from the Todoist auth configuration
-                const redirectUri = 'xnote-ai://(protected)/settings';
-                const finalUrl = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get('code');
+                const state = params.get('state');
                 
-                // Display redirect URL
-                document.getElementById('redirect-url').textContent = finalUrl;
+                // Display all parameters
+                const paramsList = document.getElementById('params-list');
+                if (params.toString()) {
+                    params.forEach((value, key) => {
+                        paramsList.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+                    });
+                } else {
+                    paramsList.innerHTML = '<p style="color: #c62828;">No parameters found in URL</p>';
+                }
                 
-                // Add a delay to ensure the information is visible
-                setTimeout(() => {
-                    window.location.href = finalUrl;
-                }, 5000); // Increased delay to 5 seconds to give time to read the information
-            } else {
+                if (code && state) {
+                    // Your existing redirect URI from the Todoist auth configuration
+                    const redirectUri = 'xnote-ai://(protected)/settings';
+                    const finalUrl = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+                    
+                    // Display redirect URL
+                    document.getElementById('redirect-url').textContent = finalUrl;
+                    
+                    // Add a delay to ensure the information is visible
+                    setTimeout(() => {
+                        window.location.href = finalUrl;
+                    }, 5000);
+                } else {
+                    throw new Error(`Required parameters missing:
+                        Code: ${code ? 'Present' : 'Missing'}
+                        State: ${state ? 'Present' : 'Missing'}
+                    `);
+                }
+            } catch (error) {
+                // Hide spinner
                 document.querySelector('.spinner').style.display = 'none';
-                document.querySelector('.container').innerHTML += `
-                    <h2 style="color: red;">Error</h2>
-                    <p>Authentication parameters are missing.</p>
+                
+                // Create error container
+                const errorContainer = document.createElement('div');
+                errorContainer.className = 'error-container';
+                errorContainer.innerHTML = `
+                    <h2 class="error-title">Authentication Error</h2>
+                    <p>An error occurred during the authentication process.</p>
+                    <div class="error-details">
+                        <strong>Error Details:</strong><br>
+                        ${error.message || 'Unknown error occurred'}<br><br>
+                        <strong>Time:</strong> ${new Date().toLocaleString()}<br>
+                        <strong>URL:</strong> ${window.location.href}
+                    </div>
                 `;
+                
+                // Insert error container after debug info
+                document.querySelector('.debug-info').after(errorContainer);
             }
         }
 
