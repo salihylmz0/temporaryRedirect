@@ -14,7 +14,7 @@
     const state = params.get('state');
 
     // Custom scheme ile mobil uygulamaya yönlendir
-    const customScheme = 'yourapp://'; // Burayı kendi custom scheme'inizle değiştirin, örn: com.myapp.oauth://
+    const customScheme = 'xnote-ai://(protected)/settings'; // Burayı kendi custom scheme'inizle değiştirin, örn: com.myapp.oauth://
     if (code && state) {
       window.location.href = `${customScheme}oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
     } else {
