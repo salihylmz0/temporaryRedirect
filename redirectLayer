@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth Callback</title>
+</head>
+<body>
+  <h1>Yönlendirme yapılıyor...</h1>
+  <script>
+    // URL'deki parametreleri al
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+
+    // Custom scheme ile mobil uygulamaya yönlendir
+    const customScheme = 'yourapp://'; // Burayı kendi custom scheme'inizle değiştirin, örn: com.myapp.oauth://
+    if (code && state) {
+      window.location.href = `${customScheme}oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    } else {
+      document.body.innerHTML = '<h1>Hata: Yönlendirme parametreleri eksik.</h1>';
+    }
+  </script>
+</body>
+</html>
