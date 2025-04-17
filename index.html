@@ -17,6 +17,8 @@
         .container {
             text-align: center;
             padding: 20px;
+            max-width: 800px;
+            word-wrap: break-word;
         }
         .spinner {
             width: 40px;
@@ -31,31 +33,70 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .uri-display {
+            margin: 20px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        .debug-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Redirecting to XNote...</h1>
         <div class="spinner"></div>
+        <div class="debug-info">
+            <h3>Debug Information:</h3>
+            <div class="uri-display" id="current-uri">
+                Current URL: <span id="current-url"></span>
+            </div>
+            <div class="uri-display" id="redirect-uri">
+                Redirect URL: <span id="redirect-url"></span>
+            </div>
+            <div class="uri-display">
+                Parameters:
+                <div id="params-list"></div>
+            </div>
+        </div>
     </div>
     <script>
         function handleRedirect() {
+            // Display current URL
+            document.getElementById('current-url').textContent = window.location.href;
+
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             const state = params.get('state');
+            
+            // Display all parameters
+            const paramsList = document.getElementById('params-list');
+            params.forEach((value, key) => {
+                paramsList.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+            });
             
             if (code && state) {
                 // Your existing redirect URI from the Todoist auth configuration
                 const redirectUri = 'xnote-ai://(protected)/settings';
                 const finalUrl = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
                 
-                // Add a small delay to ensure the animation is visible
+                // Display redirect URL
+                document.getElementById('redirect-url').textContent = finalUrl;
+                
+                // Add a delay to ensure the information is visible
                 setTimeout(() => {
                     window.location.href = finalUrl;
-                }, 1000);
+                }, 5000); // Increased delay to 5 seconds to give time to read the information
             } else {
-                document.querySelector('.container').innerHTML = `
-                    <h1>Error</h1>
+                document.querySelector('.spinner').style.display = 'none';
+                document.querySelector('.container').innerHTML += `
+                    <h2 style="color: red;">Error</h2>
                     <p>Authentication parameters are missing.</p>
                 `;
             }
